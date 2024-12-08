@@ -5,6 +5,7 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub process_names: Vec<String>,
+    pub log_path: String
 }
 
 pub fn load_settings_file(path: &str) -> Settings {

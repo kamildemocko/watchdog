@@ -1,30 +1,30 @@
 use std::fs::{self, OpenOptions};
 use std::io::Write;
+use std::path::PathBuf;
+use std::str::FromStr;
 
 use chrono::Local;
 
-const LOG_DIR: &str = "./logs";
-const LOG_FILE: &str = "./logs/watchdog.log";
 const MAX_LOG_SIZE: u64 = 10 * 1024 * 1024; // 10 MB
 const BACKUP_COUNT: usize = 5;
 
-fn rotate_logs() {
-    let metadata = match fs::metadata(LOG_FILE) {
+fn rotate_logs(log_path: &str) {
+    let metadata = match fs::metadata(log_path) {
         Ok(m) => m,
         Err(_) => return,
     };
 
     if metadata.len() > MAX_LOG_SIZE {
         // remove oldest file
-        let oldest_file = format!("{}.{}", LOG_FILE, BACKUP_COUNT);
+        let oldest_file = format!("{}.{}", log_path, BACKUP_COUNT);
         if fs::metadata(&oldest_file).is_ok() {
             fs::remove_file(oldest_file).expect("Failed to remove oldest log file")
         }
 
         // shift names
         for i in (1..=BACKUP_COUNT-1).rev() {
-            let src = format!("{}.{}", LOG_FILE, i);
-            let dst = format!("{}.{}", LOG_FILE, i + 1);
+            let src = format!("{}.{}", log_path, i);
+            let dst = format!("{}.{}", log_path, i + 1);
             if fs::metadata(&src).is_err() {
                 continue;
             }
@@ -32,19 +32,19 @@ fn rotate_logs() {
             fs::rename(src, dst).expect("Failed to rename old log file")
         }
 
-        let backup = format!("{}.1", LOG_FILE);
-        fs::rename(LOG_FILE, backup).expect("Failed to backup current log");
+        let backup = format!("{}.1", log_path);
+        fs::rename(log_path, backup).expect("Failed to backup current log");
     }
 }
 
-pub fn log_message(message: &str) {
-    let _ = fs::create_dir(LOG_DIR);
-    rotate_logs();
+pub fn log_message(log_path: &str, message: &str) {
+    let _ = fs::create_dir_all(PathBuf::from_str(log_path).unwrap().parent().unwrap());
+    rotate_logs(log_path);
 
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
-        .open(LOG_FILE)
+        .open(log_path)
         .expect("Failed to open log file");
 
     println!("{}", message);

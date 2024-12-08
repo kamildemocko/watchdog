@@ -41,7 +41,7 @@ fn main() {
                         cmd: process.cmd().iter().map(|i| i.to_string_lossy()).collect::<Vec<_>>().join(" ")
                 };
 
-                log_message(&prepare_log_message("start", pid, process.start_time(), name, &process_info.cmd));
+                log_message(&settings.log_path, &prepare_log_message("start", pid, process.start_time(), name, &process_info.cmd));
 
                 monitored_processes.insert(
                     process_info.pid, 
@@ -53,7 +53,7 @@ fn main() {
         // retain only existing processes
         monitored_processes.retain(|&pid, inf| {
             if system.process(Pid::from_u32(pid)).is_none() {
-                log_message(&prepare_log_message("end", pid, inf.start_time, &inf.name, &inf.cmd));
+                log_message(&settings.log_path, &prepare_log_message("end", pid, inf.start_time, &inf.name, &inf.cmd));
                 false
             } else {
                 true
