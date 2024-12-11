@@ -1,5 +1,6 @@
 use std::{collections::HashMap, thread, time::Duration};
 
+use chrono::DateTime;
 use sysinfo::{Pid, ProcessesToUpdate, RefreshKind, System};
 
 mod models;
@@ -41,7 +42,14 @@ fn main() {
                         cmd: process.cmd().iter().map(|i| i.to_string_lossy()).collect::<Vec<_>>().join(" ")
                 };
 
-                log_message(&settings.log_path, &prepare_log_message("start", pid, process.start_time(), name, &process_info.cmd));
+                log_message(
+                    &settings.log_path, 
+                    &prepare_log_message("start", 
+                    pid, 
+                    &conv_unix_datetime(process.start_time()), 
+                    name, 
+                    &process_info.cmd)
+                );
 
                 monitored_processes.insert(
                     process_info.pid, 
@@ -53,7 +61,14 @@ fn main() {
         // retain only existing processes
         monitored_processes.retain(|&pid, inf| {
             if system.process(Pid::from_u32(pid)).is_none() {
-                log_message(&settings.log_path, &prepare_log_message("end", pid, inf.start_time, &inf.name, &inf.cmd));
+                log_message(
+                    &settings.log_path, 
+                    &prepare_log_message("end", 
+                    pid, 
+                    &conv_unix_datetime(inf.start_time), 
+                    &inf.name, 
+                    &inf.cmd)
+                );
                 false
             } else {
                 true
@@ -62,4 +77,9 @@ fn main() {
 
         thread::sleep(Duration::from_secs(1));
     }
+}
+
+fn conv_unix_datetime(dt: u64) -> String {
+    let value = DateTime::from_timestamp(dt as i64, 0).unwrap();
+    value.to_rfc3339()
 }

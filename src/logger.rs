@@ -51,7 +51,7 @@ pub fn log_message(log_path: &str, message: &str) {
     writeln!(file, "{}", message).expect("Failed to write to log file");
 }
 
-pub fn prepare_log_message(event: &str, pid: u32, start_time: u64, name: &str, cmd: &str) -> String {
+pub fn prepare_log_message(event: &str, pid: u32, start_time: &str, name: &str, cmd: &str) -> String {
     format!(
         r#"{{"event": {}, "timestamp": {}, "pid": {}, "start_time": {}, "process_name": {}, "cmd": {:?}}}"#,
         event,
