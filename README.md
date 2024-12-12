@@ -31,6 +31,6 @@ Log is located at logs folder
 
 Example log entry:
 ```plain
-{"event": start, "timestamp": 2024-12-08T18:37:43.724121600+01:00, "pid": 1412, "start_time": "2024-12-11T18:16:21+00:00", "process_name": python.exe, "cmd": "C:\\Users\\kamil\\AppData\\Local\\Programs\\Python\\Python312\\python.exe F:\\Development\\Python\\Mood.py"}
-{"event": end, "timestamp": 2024-12-08T18:37:50.954438400+01:00, "pid": 1412, "start_time": "2024-12-11T18:16:21+00:00", "process_name": python.exe, "cmd": "C:\\Users\\kamil\\AppData\\Local\\Programs\\Python\\Python312\\python.exe F:\\Development\\Python\\Mood.py"}
+{"event": start, "timestamp": "2024-12-08T18:37:43.724121600+01:00", "pid": 1412, "start_time": "2024-12-11T18:16:21+00:00", "process_name": python.exe, "cmd": "C:\\Users\\kamil\\AppData\\Local\\Programs\\Python\\Python312\\python.exe F:\\Development\\Python\\Mood.py"}
+{"event": end, "timestamp": "2024-12-08T18:37:50.954438400+01:00", "pid": 1412, "start_time": "2024-12-11T18:16:21+00:00", "process_name": python.exe, "cmd": "C:\\Users\\kamil\\AppData\\Local\\Programs\\Python\\Python312\\python.exe F:\\Development\\Python\\Mood.py"}
 ```
