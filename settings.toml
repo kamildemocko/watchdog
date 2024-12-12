@@ -1,2 +1,0 @@
-process_names = ["python.exe"]
-log_path = "./logs/watchdog.log"
