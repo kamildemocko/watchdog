@@ -3,7 +3,9 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use chrono::Local;
+use chrono::Utc;
+
+use crate::tools::conv_unix_datetime;
 
 const MAX_LOG_SIZE: u64 = 10 * 1024 * 1024; // 10 MB
 const BACKUP_COUNT: usize = 5;
@@ -51,13 +53,19 @@ pub fn log_message(log_path: &str, message: &str) {
     writeln!(file, "{}", message).expect("Failed to write to log file");
 }
 
-pub fn prepare_log_message(event: &str, pid: u32, start_time: &str, name: &str, cmd: &str) -> String {
+pub fn prepare_log_message(event: &str, pid: u32, start_time: u64, name: &str, cmd: &str) -> String {
+    let now = Utc::now();
+    let since_start = now - conv_unix_datetime(start_time);
+    println!("{}", since_start.num_seconds());
+    let seconds = if since_start.num_seconds() > 1 { since_start.num_seconds() } else { 0 };
+
     format!(
-        r#"{{"event": {}, "timestamp": "{}", "pid": {}, "start_time": "{}", "process_name": {}, "cmd": {:?}}}"#,
+        r#"{{"event": "{}", "timestamp": "{}", "pid": {}, "start_time": "{}", "seconds": {}, "process_name": "{}", "cmd": "{}"}}"#,
         event,
-        &Local::now().to_rfc3339(),
+        now.to_rfc3339(),
         pid,
-        start_time,
+        conv_unix_datetime(start_time).to_rfc3339(),
+        seconds,
         name, 
         cmd,
     )

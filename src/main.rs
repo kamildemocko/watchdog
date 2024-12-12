@@ -1,10 +1,10 @@
 use std::{collections::HashMap, thread, time::Duration};
 
-use chrono::DateTime;
 use sysinfo::{Pid, ProcessesToUpdate, RefreshKind, System};
 
 mod models;
 mod logger;
+mod tools;
 
 use models::{load_settings_file, ProcessInfo};
 use logger::{log_message, prepare_log_message};
@@ -46,7 +46,7 @@ fn main() {
                     &settings.log_path, 
                     &prepare_log_message("start", 
                     pid, 
-                    &conv_unix_datetime(process.start_time()), 
+                    process.start_time(), 
                     name, 
                     &process_info.cmd)
                 );
@@ -65,7 +65,7 @@ fn main() {
                     &settings.log_path, 
                     &prepare_log_message("end", 
                     pid, 
-                    &conv_unix_datetime(inf.start_time), 
+                    inf.start_time, 
                     &inf.name, 
                     &inf.cmd)
                 );
@@ -77,9 +77,4 @@ fn main() {
 
         thread::sleep(Duration::from_secs(1));
     }
-}
-
-fn conv_unix_datetime(dt: u64) -> String {
-    let value = DateTime::from_timestamp(dt as i64, 0).unwrap();
-    value.to_rfc3339()
 }
