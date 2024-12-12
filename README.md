@@ -15,6 +15,7 @@ The application reads its configuration from a `settings.toml` file located in t
 
 ```toml
 process_names = ["python.exe"]
+log_path = "./logs/watchdog.log"
 ```
 
 ## Usage
