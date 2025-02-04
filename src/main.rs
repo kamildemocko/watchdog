@@ -77,5 +77,6 @@ fn main() {
         });
 
         thread::sleep(Duration::from_secs(1));
+        logger.rotate_if_needed()
     }
 }
