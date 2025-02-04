@@ -1,17 +1,20 @@
-use std::{collections::HashMap, thread, time::Duration};
+use std::{collections::HashMap, path::PathBuf, thread, time::Duration};
 
+use logger::Logger;
 use sysinfo::{Pid, ProcessesToUpdate, RefreshKind, System};
 
 mod models;
 mod logger;
-mod tools;
+mod logger_csv;
 
 use models::{load_settings_file, ProcessInfo};
-use logger::{log_message, prepare_log_message};
+use logger::LogEntry;
+use logger_csv::CSVLogger;
 
 
 fn main() {
     let settings = load_settings_file("settings.toml");
+    let mut logger = CSVLogger::new(PathBuf::from(&settings.log_path), ';');
     let mut system = System::new_all();
     let mut monitored_processes: HashMap<u32, ProcessInfo> = HashMap::new();
 
@@ -42,14 +45,13 @@ fn main() {
                         cmd: process.cmd().iter().map(|i| i.to_string_lossy()).collect::<Vec<_>>().join(" ")
                 };
 
-                log_message(
-                    &settings.log_path, 
-                    &prepare_log_message("start", 
-                    pid, 
-                    process.start_time(), 
-                    name, 
-                    &process_info.cmd)
-                );
+                logger.log_item(LogEntry{
+                    event: "start",
+                    pid: pid,
+                    start_time: process.start_time(),
+                    name: name,
+                    cmd: &process_info.cmd,
+                });
 
                 monitored_processes.insert(
                     process_info.pid, 
@@ -61,14 +63,13 @@ fn main() {
         // retain only existing processes
         monitored_processes.retain(|&pid, inf| {
             if system.process(Pid::from_u32(pid)).is_none() {
-                log_message(
-                    &settings.log_path, 
-                    &prepare_log_message("end", 
-                    pid, 
-                    inf.start_time, 
-                    &inf.name, 
-                    &inf.cmd)
-                );
+                logger.log_item(LogEntry{
+                    event: "end",
+                    pid: pid,
+                    start_time: inf.start_time,
+                    name: &inf.name,
+                    cmd: &inf.cmd,
+                });
                 false
             } else {
                 true
