@@ -62,6 +62,7 @@ impl CSVLogger {
         let mut wrt = WriterBuilder::new()
             .has_headers(!Path::exists(&self.path))
             .delimiter(self.delimeter as u8)
+            .quote_style(csv::QuoteStyle::Necessary)
             .from_writer(vec![]);
         wrt.serialize(entry)?;
 
