@@ -4,9 +4,11 @@ use std::path::PathBuf;
 pub struct LogEntry<'a> {
     pub event: &'a str,
     pub pid: u32,
-    pub start_time: u64,
     pub name: &'a str,
     pub cmd: &'a str,
+    pub timestamp: i64,
+    pub start_time: i64,
+    pub seconds: u32,
 }
 
 pub trait Logger {

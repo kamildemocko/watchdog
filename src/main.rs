@@ -21,6 +21,8 @@ fn main() {
     println!("Starting process watchdog");
 
     loop {
+        let now = chrono::Local::now().timestamp();
+
         system.refresh_processes(ProcessesToUpdate::All, true);
         system.refresh_specifics(RefreshKind::everything());
 
@@ -48,9 +50,11 @@ fn main() {
                 logger.log_item(LogEntry{
                     event: "start",
                     pid: pid,
-                    start_time: process.start_time(),
                     name: name,
                     cmd: &process_info.cmd,
+                    timestamp: now,
+                    start_time: process.start_time() as i64,
+                    seconds: (now - process.start_time() as i64) as u32
                 });
 
                 monitored_processes.insert(
@@ -66,9 +70,11 @@ fn main() {
                 logger.log_item(LogEntry{
                     event: "end",
                     pid: pid,
-                    start_time: inf.start_time,
                     name: &inf.name,
                     cmd: &inf.cmd,
+                    timestamp: now,
+                    start_time: inf.start_time as i64,
+                    seconds: (now - inf.start_time as i64) as u32
                 });
                 false
             } else {
