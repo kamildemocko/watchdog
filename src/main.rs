@@ -18,7 +18,7 @@ fn main() {
     let mut system = System::new_all();
     let mut monitored_processes: HashMap<u32, ProcessInfo> = HashMap::new();
 
-    println!("Starting process watchdog");
+    println!("Watching for processes {:?}", settings.process_names);
 
     loop {
         let now = chrono::Local::now().timestamp();
@@ -56,6 +56,7 @@ fn main() {
                     start_time: process.start_time() as i64,
                     seconds: (now - process.start_time() as i64) as u32
                 });
+                println!(" \u{00BB} Add process:\t{} ({})", name, pid);
 
                 monitored_processes.insert(
                     process_info.pid, 
@@ -76,6 +77,8 @@ fn main() {
                     start_time: inf.start_time as i64,
                     seconds: (now - inf.start_time as i64) as u32
                 });
+                println!(" \u{00BB} Rem process:\t{} ({})", &inf.name, pid);
+
                 false
             } else {
                 true
