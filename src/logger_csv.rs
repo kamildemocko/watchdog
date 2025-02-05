@@ -2,7 +2,7 @@ use std::{fs::{self, File}, path::{Path, PathBuf}};
 use std::io::Write;
 use std::error::Error;
 
-use csv::WriterBuilder;
+use csv::{WriterBuilder,QuoteStyle};
 
 use crate::logger::{Logger,LogEntry};
 
@@ -62,7 +62,7 @@ impl CSVLogger {
         let mut wrt = WriterBuilder::new()
             .has_headers(!Path::exists(&self.path))
             .delimiter(self.delimeter as u8)
-            .quote_style(csv::QuoteStyle::Necessary)
+            .quote_style(QuoteStyle::Necessary)
             .from_writer(vec![]);
         wrt.serialize(entry)?;
 
