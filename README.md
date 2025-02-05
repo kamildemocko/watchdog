@@ -15,7 +15,7 @@ Watchdog is a Rust application that monitors specific processes on your system a
 The application reads its configuration from a `settings.toml` file located in the root directory. The file should contain a list of process names to monitor:
 
 ```toml
-process_names = ["python.exe"]
+process_names = ["anki"]
 log_path = "./logs/watchdog.csv"
 ```
 
