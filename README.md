@@ -36,7 +36,7 @@ Set delimeter with `loggerinstance.with_delimeter(";")` and set custom settings 
 
 Example log entry:
 ```csv
-event;pid;start_time;name;cmd
-start;13319;1738739816;anki;/Applications/Anki.app/Contents/MacOS/anki
-end;13319;1738739816;anki;/Applications/Anki.app/Contents/MacOS/anki
+event;pid;name;cmd;timestamp;start_time;seconds
+start;29326;anki;/Applications/Anki.app/Contents/MacOS/anki;1738766581;1738766581;0
+start;29326;anki;/Applications/Anki.app/Contents/MacOS/anki;1738766601;1738766581;20
 ```
