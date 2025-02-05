@@ -1,4 +1,3 @@
-use core::panic;
 use std::{fs::{self, File}, path::{Path, PathBuf}};
 use std::io::Write;
 use std::error::Error;
@@ -9,8 +8,8 @@ use crate::logger::{Logger,LogEntry};
 
 #[derive(Debug)]
 pub struct LogConfig {
-    max_file_size: u64,
-    rotation_count: u32,
+    pub max_file_size: u64,
+    pub rotation_count: u32,
 }
 
 impl Default for LogConfig {
@@ -24,20 +23,23 @@ impl Default for LogConfig {
 
 pub struct CSVLogger {
     path: PathBuf,
-    exists: bool,
-    sep: char,
+    delimeter: char,
     config: LogConfig
 }
 
 impl Logger for CSVLogger {
-    fn new(path: PathBuf, sep: char) -> Self {
-        let file_exists = Path::exists(&path);
-
+    fn new(path: PathBuf) -> Self {
         let cfg = LogConfig::default();
-        CSVLogger { path: path, sep: sep, exists: file_exists, config: cfg}
+        let default_delimeter = ',';
+
+        CSVLogger {
+            path: path, 
+            delimeter: default_delimeter, 
+            config: cfg
+        }
     }
 
-    fn log_item(&mut self, entry: LogEntry) {
+    fn log_item(&self, entry: LogEntry) {
         let message = self.prepare_log_entry(entry).expect("cannot prepare log message");
         self.write_log(message).expect("cannot write log file to fs");
         }
@@ -50,10 +52,16 @@ impl CSVLogger {
         self
     }
 
+    #[allow(dead_code)]
+    pub fn with_delimeter(mut self, delimeter: char) -> Self {
+        self.delimeter = delimeter;
+        self
+    }
+
     fn prepare_log_entry(&self, entry: LogEntry) -> Result<String, Box<dyn Error>> {
         let mut wrt = WriterBuilder::new()
-            .has_headers(!self.exists)
-            .delimiter(self.sep as u8)
+            .has_headers(!Path::exists(&self.path))
+            .delimiter(self.delimeter as u8)
             .from_writer(vec![]);
         wrt.serialize(entry)?;
 
@@ -61,16 +69,15 @@ impl CSVLogger {
         Ok(data)
     }
 
-    fn write_log(&mut self, message: String) -> Result<(), Box<dyn Error>> {
+    fn write_log(&self, message: String) -> Result<(), Box<dyn Error>> {
         let mut file: fs::File;
-        if self.exists {
+        if Path::exists(&self.path) {
             file = fs::OpenOptions::new()
                 .append(true)
                 .open(&self.path)?;
         } else {
             fs::create_dir_all(&self.path.parent().unwrap())?;
             file = File::create(&self.path)?;
-            self.exists = true
         }
 
         write!(file, "{}", message)?;
@@ -78,8 +85,8 @@ impl CSVLogger {
         Ok(())
     }
 
-    pub fn rotate_if_needed(&mut self) {
-        if !self.exists { return }
+    pub fn rotate_if_needed(&self) {
+        if !Path::exists(&self.path) { return }
 
         let metadata = fs::metadata(&self.path).expect("cannot get log metadata");
         if metadata.len() >= self.config.max_file_size {
@@ -87,18 +94,20 @@ impl CSVLogger {
         }
     }
 
-    fn rotate_logs(&mut self) -> Result<(), Box<dyn Error>> {
+    fn rotate_logs(&self) -> Result<(), std::io::Error> {
         let ext = self.path.extension().unwrap().to_str().unwrap();
         for i in (1..self.config.rotation_count).rev() {
-            let old_path = self.path.with_extension(format!("{}.{}", ext, i-1));
-            let new_path = self.path.with_extension(format!("{}.{}", ext, i));
+            let old_path = self.path.with_extension(format!("{}.{}", i-1, ext));
+            let new_path = self.path.with_extension(format!("{}.{}", i, ext));
+
+            println!("i: {}, old: {:?}, new: {:?}", i, old_path, new_path);
+
             if old_path.exists() {
                 fs::rename(old_path, new_path)?;
             }
         }
 
-        fs::rename(&self.path, self.path.with_extension(format!("{}.0", ext)))?;
-        self.exists = false;
+        fs::rename(&self.path, self.path.with_extension(format!("{}.{}", "0", ext)))?;
 
         Ok(())
     }

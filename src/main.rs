@@ -14,7 +14,7 @@ use logger_csv::CSVLogger;
 
 fn main() {
     let settings = load_settings_file("settings.toml");
-    let mut logger = CSVLogger::new(PathBuf::from(&settings.log_path), ';');
+    let logger = CSVLogger::new(PathBuf::from(&settings.log_path)).with_delimeter(';');
     let mut system = System::new_all();
     let mut monitored_processes: HashMap<u32, ProcessInfo> = HashMap::new();
 
@@ -76,7 +76,8 @@ fn main() {
             }
         });
 
+        logger.rotate_if_needed();
+
         thread::sleep(Duration::from_secs(1));
-        logger.rotate_if_needed()
     }
 }

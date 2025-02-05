@@ -10,6 +10,6 @@ pub struct LogEntry<'a> {
 }
 
 pub trait Logger {
-    fn new(path: PathBuf, sep: char) -> Self;
-    fn log_item(&mut self, entry: LogEntry);
+    fn new(path: PathBuf) -> Self;
+    fn log_item(&self, entry: LogEntry);
 }
