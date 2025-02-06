@@ -44,7 +44,13 @@ fn main() {
                         pid: pid, 
                         start_time: process.start_time(), 
                         name: name.to_string(), 
-                        cmd: process.cmd().iter().map(|i| i.to_string_lossy()).collect::<Vec<_>>().join(" ")
+                        cmd: process.cmd()
+                            .iter()
+                            .map(|i| i.to_string_lossy())
+                            .map(|i| i.replace("\n", " "))
+                            .map(|i| i.replace("\t", " "))
+                            .collect::<Vec<_>>()
+                            .join(" ")
                 };
 
                 logger.log_item(LogEntry{
